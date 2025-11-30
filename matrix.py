@@ -30,6 +30,11 @@ class matrix:
         for i in range(size):
             data[i][i] = 1
         return matrix(data)
+    
+    @staticmethod
+    def random(rows, cols):
+        import random
+        return matrix([[random.uniform(-1, 1) for _ in range(cols)] for _ in range(rows)])
 
     def transpose(self):
         matrix_shape = self.shape()
@@ -43,12 +48,31 @@ class matrix:
 
     
     def __add__(self, other):
-        if self.shape() != other.shape():
-            raise ValueError("Matrices must have the same dimensions to add.")
-        result_data = [[self.data[i][j] + other.data[i][j] 
-                        for j in range(self.shape()[1])] 
-                       for i in range(self.shape()[0])]
-        return matrix(result_data)
+        rows1, cols1 = self.shape()
+        rows2, cols2 = other.shape()
+
+        if rows1 == rows2 and cols1 == cols2:
+            result_data = [[self.data[i][j] + other.data[i][j] 
+                            for j in range(cols1)] 
+                            for i in range(rows1)]
+            return matrix(result_data)
+
+        elif rows2 == 1 and cols1 == cols2:
+            main_matrix = self  
+            bias_vector = other 
+
+            result_data = []
+            for i in range(rows1):
+                # Lặp qua tất cả các hàng của Z
+                new_row = [main_matrix.data[i][j] + bias_vector.data[0][j] 
+                        for j in range(cols1)]
+                result_data.append(new_row)
+            return matrix(result_data)
+
+        elif rows1 == 1 and cols1 == cols2:
+            return other.__add__(self)
+        else:
+            raise ValueError("Matrices must have the same dimensions or be broadcastable (m x k + 1 x k) to add.")
     
     def __sub__(self, other):
         if self.shape() != other.shape():
